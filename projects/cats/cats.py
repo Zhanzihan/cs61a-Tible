@@ -16,7 +16,13 @@ def choose(paragraphs, select, k):
     the empty string.
     """
     # BEGIN PROBLEM 1
-    "*** YOUR CODE HERE ***"
+    count = 0
+    for i in paragraphs:
+        if(select(i)):
+            if count == k:
+                return i
+            count += 1
+    return ''
     # END PROBLEM 1
 
 
@@ -32,7 +38,13 @@ def about(topic):
     """
     assert all([lower(x) == x for x in topic]), 'topics should be lowercase.'
     # BEGIN PROBLEM 2
-    "*** YOUR CODE HERE ***"
+    def judge(paragraph):
+        strings = split(remove_punctuation(lower(paragraph)))
+        for i in topic:
+            if i in strings:
+                return True
+        return False
+    return judge
     # END PROBLEM 2
 
 
@@ -56,7 +68,13 @@ def accuracy(typed, reference):
     typed_words = split(typed)
     reference_words = split(reference)
     # BEGIN PROBLEM 3
-    "*** YOUR CODE HERE ***"
+    count = 0
+    for (x, y) in zip(typed_words, reference_words):
+        if x == y:
+            count += 1
+    if len(typed_words) == 0:
+        return 0.0
+    return count / len(typed_words) * 100
     # END PROBLEM 3
 
 
@@ -64,7 +82,7 @@ def wpm(typed, elapsed):
     """Return the words-per-minute (WPM) of the TYPED string."""
     assert elapsed > 0, 'Elapsed time must be positive'
     # BEGIN PROBLEM 4
-    "*** YOUR CODE HERE ***"
+    return len(typed) / elapsed * 12
     # END PROBLEM 4
 
 
@@ -74,7 +92,18 @@ def autocorrect(user_word, valid_words, diff_function, limit):
     than LIMIT.
     """
     # BEGIN PROBLEM 5
-    "*** YOUR CODE HERE ***"
+    if user_word in valid_words:
+        return user_word
+    word = user_word
+    minn = len(user_word)
+    for i in valid_words:
+        diff = diff_function(user_word, i, limit)
+        if diff < minn:
+            word = i
+            minn = diff
+    if minn > limit:
+        return user_word
+    return word
     # END PROBLEM 5
 
 
@@ -84,32 +113,34 @@ def shifty_shifts(start, goal, limit):
     their lengths.
     """
     # BEGIN PROBLEM 6
-    assert False, 'Remove this line'
+    def helper(temp, temp_goal, now):
+        if now > limit:
+            return now
+        if temp == '':
+            return len(temp_goal) + now
+        if temp_goal == '':
+            return len(temp) + now
+        if temp[0] == temp_goal[0]:
+            return helper(temp[1:], temp_goal[1:], now)
+        return helper(temp[1:], temp_goal[1:], now + 1)
+
+    return helper(start, goal, 0)
     # END PROBLEM 6
 
 
 def pawssible_patches(start, goal, limit):
     """A diff function that computes the edit distance from START to GOAL."""
-    assert False, 'Remove this line'
-
-    if ______________: # Fill in the condition
-        # BEGIN
-        "*** YOUR CODE HERE ***"
-        # END
-
-    elif ___________: # Feel free to remove or add additional cases
-        # BEGIN
-        "*** YOUR CODE HERE ***"
-        # END
-
-    else:
-        add_diff = ... # Fill in these lines
-        remove_diff = ...
-        substitute_diff = ...
-        # BEGIN
-        "*** YOUR CODE HERE ***"
-        # END
-
+    def helper(temp, temp_goal, now):
+        if now > limit:
+            return now
+        if temp == '':
+            return len(temp_goal) + now
+        if temp_goal == '':
+            return len(temp) + now
+        if temp[0] == temp_goal[0]:
+            return helper(temp[1:], temp_goal[1:], now)
+        return min(helper(temp[1:], temp_goal, now + 1), helper(temp, temp_goal[1:], now + 1), helper(temp[1:], temp_goal[1:], now + 1))
+    return helper(start, goal, 0)
 
 def final_diff(start, goal, limit):
     """A diff function. If you implement this function, it will be used."""
@@ -125,6 +156,13 @@ def report_progress(typed, prompt, user_id, send):
     """Send a report of your id and progress so far to the multiplayer server."""
     # BEGIN PROBLEM 8
     "*** YOUR CODE HERE ***"
+    progress = len(typed) / len(prompt)
+    for i in range(len(typed)):
+        if typed[i] != prompt[i]:
+            progress = i / len(prompt)
+            break
+    send({'id': user_id, 'progress': progress})
+    return progress
     # END PROBLEM 8
 
 
@@ -151,6 +189,15 @@ def time_per_word(times_per_player, words):
     """
     # BEGIN PROBLEM 9
     "*** YOUR CODE HERE ***"
+    time = []
+    for time_t in times_per_player:
+        time_a = []
+        last = time_t[0]
+        for i in time_t[1:]:
+            time_a.append(i - last)
+            last = i
+        time.append(time_a)
+    return game(words, time)
     # END PROBLEM 9
 
 
@@ -165,9 +212,15 @@ def fastest_words(game):
     player_indices = range(len(all_times(game)))  # contains an *index* for each player
     word_indices = range(len(all_words(game)))    # contains an *index* for each word
     # BEGIN PROBLEM 10
-    "*** YOUR CODE HERE ***"
+    list = []
+    for i in player_indices:
+        word = []
+        for j in word_indices:
+            if word_at(game, j) not in sum(list, []) and time(game, i, j) == min([time(game, x, j) for x in player_indices]):
+                word.append(word_at(game, j))
+        list.append(word)
+    return list
     # END PROBLEM 10
-
 
 def game(words, times):
     """A data abstraction containing all words typed and their times."""
